@@ -22,3 +22,21 @@ export async function getPrediction() {
     return { prediction: null, error: error.message };
   }
 }
+
+export async function getPaperStatus() {
+  try {
+    const response = await client.get('/paper/status');
+    return { status: response.data, error: null };
+  } catch (error) {
+    return { status: null, error: error.message };
+  }
+}
+
+export async function runPaperTrading(maxRows = 5000) {
+  try {
+    const response = await client.post(`/paper/run?max_rows=${maxRows}`);
+    return { result: response.data, error: null };
+  } catch (error) {
+    return { result: null, error: error.message };
+  }
+}
