@@ -32,9 +32,27 @@ export async function getPaperStatus() {
   }
 }
 
+export async function getPaperComparison() {
+  try {
+    const response = await client.get('/paper/compare');
+    return { comparison: response.data, error: null };
+  } catch (error) {
+    return { comparison: null, error: error.message };
+  }
+}
+
 export async function runPaperTrading(maxRows = 5000) {
   try {
     const response = await client.post(`/paper/run?max_rows=${maxRows}`);
+    return { result: response.data, error: null };
+  } catch (error) {
+    return { result: null, error: error.message };
+  }
+}
+
+export async function runCandidatePaperTrading(maxRows = 5000) {
+  try {
+    const response = await client.post(`/paper/run-candidate?max_rows=${maxRows}`);
     return { result: response.data, error: null };
   } catch (error) {
     return { result: null, error: error.message };
