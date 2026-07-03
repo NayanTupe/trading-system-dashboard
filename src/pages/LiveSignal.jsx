@@ -4,7 +4,7 @@ import SignalCard from '../components/SignalCard.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
 import { useApiHealth } from '../hooks/useApiHealth.js';
 import { usePrediction } from '../hooks/usePrediction.js';
-import { getPaperComparison, getPaperStatus, runCandidatePaperTrading, runPaperTrading } from '../utils/apiClient.js';
+import { getLiveReadinessAudit, getPaperComparison, getPaperStatus, runCandidatePaperTrading, runPaperTrading } from '../utils/apiClient.js';
 import { formatCurrency, formatNumber } from '../utils/formatters.js';
 
 const warningLabels = {
@@ -80,6 +80,7 @@ export default function LiveSignal() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [paperStatus, setPaperStatus] = useState(null);
   const [comparison, setComparison] = useState(null);
+  const [audit, setAudit] = useState(null);
   const [paperError, setPaperError] = useState(null);
   const [runningPaper, setRunningPaper] = useState(false);
   const [runningCandidate, setRunningCandidate] = useState(false);
@@ -93,6 +94,9 @@ export default function LiveSignal() {
     });
     getPaperComparison().then((response) => {
       setComparison(response.comparison);
+    });
+    getLiveReadinessAudit().then((response) => {
+      setAudit(response.audit);
     });
   }, [refreshKey]);
 
@@ -228,6 +232,40 @@ export default function LiveSignal() {
               {comparison?.decision?.reason && (
                 <Typography color="text.secondary">{comparison.decision.reason}</Typography>
               )}
+            </Stack>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12}>
+        <Card>
+          <CardContent>
+            <Stack spacing={2}>
+              <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={1}>
+                <div>
+                  <Typography variant="h6">Live Readiness Audit</Typography>
+                  <Typography color="text.secondary">Final gate before any real-money deployment.</Typography>
+                </div>
+                <StatusBadge
+                  label={audit?.decision || 'Audit unavailable'}
+                  status={audit?.approved ? 'success' : 'warning'}
+                />
+              </Stack>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={4}>
+                  <ModelMetric label="Recommended Model" value={audit?.recommended_model || 'Waiting for audit'} />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <ModelMetric label="Production Score" value={formatNumber(audit?.production?.score || 0, 3)} />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <ModelMetric label="Candidate Score" value={formatNumber(audit?.candidate?.score || 0, 3)} />
+                </Grid>
+              </Grid>
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                {(audit?.next_actions || []).slice(0, 4).map((action) => (
+                  <StatusBadge key={action} label={action} status={audit?.approved ? 'success' : 'warning'} />
+                ))}
+              </Stack>
             </Stack>
           </CardContent>
         </Card>

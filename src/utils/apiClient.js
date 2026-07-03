@@ -41,6 +41,15 @@ export async function getPaperComparison() {
   }
 }
 
+export async function getLiveReadinessAudit() {
+  try {
+    const response = await client.get('/validation/live-readiness-audit');
+    return { audit: response.data, error: null };
+  } catch (error) {
+    return { audit: null, error: error.message };
+  }
+}
+
 export async function runPaperTrading(maxRows = 5000) {
   try {
     const response = await client.post(`/paper/run?max_rows=${maxRows}`);
