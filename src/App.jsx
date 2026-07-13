@@ -9,6 +9,7 @@ import WalkForward from './pages/WalkForward.jsx';
 import Optimization from './pages/Optimization.jsx';
 import LiveSignal from './pages/LiveSignal.jsx';
 import Risk from './pages/Risk.jsx';
+import SystemStatus from './pages/SystemStatus.jsx';
 import { buildTheme } from './theme/theme.js';
 
 export default function App() {
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/walk-forward" element={<WalkForward />} />
           <Route path="/optimization" element={<Optimization />} />
           <Route path="/live-signal" element={<LiveSignal />} />
+          <Route path="/system-status" element={<SystemStatus />} />
           <Route path="/risk" element={<Risk />} />
         </Route>
       </Routes>

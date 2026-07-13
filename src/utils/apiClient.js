@@ -50,6 +50,15 @@ export async function getLiveReadinessAudit() {
   }
 }
 
+export async function getSystemStatus() {
+  try {
+    const response = await client.get('/system/status');
+    return { systemStatus: response.data, error: null };
+  } catch (error) {
+    return { systemStatus: null, error: error.message };
+  }
+}
+
 export async function runPaperTrading(maxRows = 5000) {
   try {
     const response = await client.post(`/paper/run?max_rows=${maxRows}`);
