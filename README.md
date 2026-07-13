@@ -22,6 +22,8 @@ The **System Status** sidebar page reads `GET /system/status` and displays:
 - Kill switch, feed, schema, lane parity, daily paper P&L, and loss streak.
 - Option-chain quality and genuine forward-evidence status.
 - Historical options replay and time-ordered feature walk-forward results.
+- Automated candidate snapshot warm-up, journal count, and eligible 15-minute
+  forward-evidence progress toward the configured 60-observation gate.
 - Final live-readiness decision.
 
 The backend payload is sanitized and does not expose credentials, access tokens,

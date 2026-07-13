@@ -75,6 +75,7 @@ export default function SystemStatus() {
   const replay = validation.options_historical_replay || {};
   const optionsWalkForward = validation.options_model_walk_forward || {};
   const forward = validation.options_forward_evidence || {};
+  const candidateForward = validation.options_candidate_forward || {};
   const quality = validation.options_chain_quality || {};
   const parity = validation.feature_parity || {};
   const readiness = validation.live_readiness || {};
@@ -201,6 +202,22 @@ export default function SystemStatus() {
               ))}
               <StatusBadge label={forward.status || 'Forward evidence unavailable'} status={forward.mature_observations > 0 ? 'success' : 'warning'} />
               <Typography color="text.secondary">Mature forward observations: {formatNumber(forward.mature_observations || 0, 0)}</Typography>
+              <Stack spacing={1} sx={{ p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                <Stack direction="row" justifyContent="space-between" spacing={1}>
+                  <Typography fontWeight={900}>Walk-Forward Candidate Progress</Typography>
+                  <StatusBadge
+                    label={candidateForward.forward_candidate_passed ? 'Forward gates pass' : candidateForward.status || 'Not started'}
+                    status={candidateForward.forward_candidate_passed ? 'success' : 'warning'}
+                  />
+                </Stack>
+                <Metric label="Journaled signals" value={formatNumber(candidateForward.progress?.journaled_signals || 0, 0)} />
+                <Metric label="Eligible 15m evidence" value={`${formatNumber(candidateForward.progress?.eligible_15m_observations || 0, 0)} / ${formatNumber(candidateForward.progress?.required_eligible_15m_observations || 60, 0)}`} />
+                {(candidateForward.candidates || []).map((candidate) => (
+                  <Typography key={candidate.underlying} variant="caption" color="text.secondary">
+                    {candidate.underlying}: {candidate.live_features?.available_snapshots || 0}/{candidate.live_features?.required_snapshots || 16} contiguous snapshots
+                  </Typography>
+                ))}
+              </Stack>
             </Stack>
           </CardContent>
         </Card>
