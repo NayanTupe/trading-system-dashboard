@@ -24,7 +24,12 @@ The **System Status** sidebar page reads `GET /system/status` and displays:
 - Historical options replay and time-ordered feature walk-forward results.
 - Automated candidate snapshot warm-up, journal count, and eligible 15-minute
   forward-evidence progress toward the configured 60-observation gate.
-- Final live-readiness decision.
+- Historical options aggregate profit factor and 10/25/50 bps cost-stress evidence.
+- Final preflight checklist with offline, historical, live-market, external-review,
+  and user-input blockers.
+- Local operator-alert summary and investment-plan readiness/missing inputs.
+- Loss-streak cooldown and manual-reset requirement.
+- Final live-readiness decision; broker orders remain disabled while blocked.
 
 The backend payload is sanitized and does not expose credentials, access tokens,
 or token-expiry details. A passing data check is not the same as live approval.

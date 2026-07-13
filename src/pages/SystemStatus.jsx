@@ -80,6 +80,9 @@ export default function SystemStatus() {
   const parity = validation.feature_parity || {};
   const readiness = validation.live_readiness || {};
   const accelerated = validation.accelerated || {};
+  const preflight = validation.live_preflight || {};
+  const alerts = validation.operator_alerts || {};
+  const investmentPlan = validation.investment_plan || {};
 
   return (
     <Grid container spacing={2}>
@@ -138,6 +141,7 @@ export default function SystemStatus() {
                 <Grid item xs={6}><Metric label="Options parity" value={safety.parity_by_lane?.options_trading ? 'PASS' : 'FAIL'} /></Grid>
                 <Grid item xs={6}><Metric label="Daily paper P&L" value={formatCurrency(safety.daily_pnl || 0)} /></Grid>
                 <Grid item xs={6}><Metric label="Loss streak" value={formatNumber(safety.consecutive_losses || 0, 0)} /></Grid>
+                <Grid item xs={12}><Metric label="Loss-streak reset" value={safety.loss_streak_reset_required ? 'REVIEW REQUIRED' : 'Clear'} tone={safety.loss_streak_reset_required ? 'error.main' : 'success.main'} /></Grid>
               </Grid>
               <Typography variant="caption" color="text.secondary">State updated: {safety.updated_at || '-'}</Typography>
             </Stack>
@@ -172,12 +176,14 @@ export default function SystemStatus() {
                 <div>
                   <Typography fontWeight={900}>Feature Walk-Forward Candidate</Typography>
                   <Typography color="text.secondary">
-                    {formatNumber(optionsWalkForward.summary?.total_test_trades || 0, 0)} unseen trades · {formatNumber(optionsWalkForward.summary?.fold_count || 0, 0)} folds
+                    {formatNumber(optionsWalkForward.trading_days || 0, 0)} days · {formatNumber(optionsWalkForward.summary?.total_test_trades || 0, 0)} unseen trades · {formatNumber(optionsWalkForward.summary?.fold_count || 0, 0)} folds
                   </Typography>
                 </div>
                 <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                   <StatusBadge label={`${formatNumber(optionsWalkForward.summary?.weighted_direction_accuracy_pct || 0, 2)}% accuracy`} status={optionsWalkForward.summary?.weighted_direction_accuracy_pct >= 55 ? 'success' : 'warning'} />
                   <StatusBadge label={`${formatNumber(optionsWalkForward.summary?.weighted_average_net_option_return_pct || 0, 3)}% avg net`} status={optionsWalkForward.summary?.weighted_average_net_option_return_pct > 0 ? 'success' : 'warning'} />
+                  <StatusBadge label={`PF ${formatNumber(optionsWalkForward.summary?.aggregate_profit_factor || 0, 2)}`} status={optionsWalkForward.summary?.aggregate_profit_factor >= 1.3 ? 'success' : 'warning'} />
+                  <StatusBadge label={`25bps PF ${formatNumber(optionsWalkForward.summary?.cost_scenarios?.['25bps']?.aggregate_profit_factor || 0, 2)}`} status={optionsWalkForward.summary?.cost_scenarios?.['25bps']?.aggregate_profit_factor >= 1.2 ? 'success' : 'warning'} />
                   <StatusBadge label={optionsWalkForward.historical_candidate_passed ? 'Historical gates pass' : 'Historical gates fail'} status={optionsWalkForward.historical_candidate_passed ? 'success' : 'warning'} />
                 </Stack>
               </Stack>
@@ -236,6 +242,75 @@ export default function SystemStatus() {
                   <Typography fontWeight={800}>{item.symbol}</Typography>
                   <StatusBadge label={item.status} status={item.status === 'PASS' ? 'success' : 'neutral'} />
                 </Stack>
+              ))}
+            </Stack>
+          </CardContent>
+        </Card>
+      </Grid>
+
+      <Grid item xs={12}>
+        <Card>
+          <CardContent>
+            <Stack spacing={2}>
+              <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={1}>
+                <div>
+                  <Typography variant="h6">Final Live Preflight</Typography>
+                  <Typography color="text.secondary">Offline engineering is separated from evidence that requires a live market or user approval.</Typography>
+                </div>
+                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                  <StatusBadge label={preflight.status || 'Not generated'} status={preflight.approved ? 'success' : 'warning'} />
+                  {preflight.only_live_or_user_inputs_remaining && <StatusBadge label="Only live/user inputs remain" status="success" />}
+                </Stack>
+              </Stack>
+              <Grid container spacing={1.5}>
+                {(preflight.checks || []).map((check) => (
+                  <Grid item xs={12} md={6} key={check.name}>
+                    <Stack direction="row" justifyContent="space-between" spacing={1} sx={{ p: 1.2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                      <div>
+                        <Typography fontWeight={850}>{check.name.replaceAll('_', ' ')}</Typography>
+                        <Typography variant="caption" color="text.secondary">{check.detail}</Typography>
+                      </div>
+                      <StatusBadge label={check.passed ? 'PASS' : check.category} status={check.passed ? 'success' : 'warning'} />
+                    </Stack>
+                  </Grid>
+                ))}
+              </Grid>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <Card sx={{ height: '100%' }}>
+          <CardContent>
+            <Stack spacing={1.5}>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="h6">Operator Alerts</Typography>
+                <StatusBadge label={alerts.status || 'Not generated'} status={alerts.status === 'CLEAR' ? 'success' : 'warning'} />
+              </Stack>
+              <Metric label="Unacknowledged" value={formatNumber(alerts.unacknowledged_alerts || 0, 0)} />
+              {(alerts.recent || []).slice(0, 4).map((alert) => (
+                <Stack key={alert.id} spacing={0.3} sx={{ p: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                  <Typography fontWeight={850}>{alert.severity}: {alert.message}</Typography>
+                  <Typography variant="caption" color="text.secondary">{alert.created_at}</Typography>
+                </Stack>
+              ))}
+            </Stack>
+          </CardContent>
+        </Card>
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <Card sx={{ height: '100%' }}>
+          <CardContent>
+            <Stack spacing={1.5}>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="h6">Investment Readiness</Typography>
+                <StatusBadge label={investmentPlan.status || 'Not generated'} status={investmentPlan.status === 'PLAN_READY_FOR_USER_REVIEW' ? 'success' : 'warning'} />
+              </Stack>
+              <Typography color="text.secondary">Plan-only lane. Automatic orders, leverage, and derivatives remain disabled.</Typography>
+              {(investmentPlan.missing_inputs || []).map((item) => (
+                <Typography key={item} variant="body2">• {item.replaceAll('_', ' ')}</Typography>
               ))}
             </Stack>
           </CardContent>
