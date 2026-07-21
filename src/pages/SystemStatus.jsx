@@ -83,6 +83,8 @@ export default function SystemStatus() {
   const preflight = validation.live_preflight || {};
   const alerts = validation.operator_alerts || {};
   const investmentPlan = validation.investment_plan || {};
+  const paperAccount = status?.paper_account || {};
+  const paperPnl = Number(paperAccount.realized_pnl || 0) + Number(paperAccount.unrealized_pnl || 0);
 
   return (
     <Grid container spacing={2}>
@@ -122,6 +124,36 @@ export default function SystemStatus() {
       <Grid item xs={12} md={4}><LaneCard title="Options Paper" lane={status?.lanes?.options_trading} /></Grid>
       <Grid item xs={12} md={4}><LaneCard title="Equity Intraday" lane={status?.lanes?.equity_intraday} /></Grid>
       <Grid item xs={12} md={4}><LaneCard title="Investment Plan" lane={status?.lanes?.long_term_investment} /></Grid>
+
+      <Grid item xs={12}>
+        <Card>
+          <CardContent>
+            <Stack spacing={2}>
+              <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={1}>
+                <div>
+                  <Typography variant="h6">₹1 Lakh Options Paper Account</Typography>
+                  <Typography color="text.secondary">Conservative bid/ask marks and costs; no broker orders.</Typography>
+                </div>
+                <StatusBadge
+                  label={paperAccount.open_positions ? 'PAPER POSITION OPEN' : 'NO OPEN POSITION'}
+                  status={paperAccount.open_positions ? 'warning' : 'neutral'}
+                />
+              </Stack>
+              <Grid container spacing={2}>
+                <Grid item xs={6} md={2}><Metric label="Starting balance" value={formatCurrency(paperAccount.starting_balance || 0)} /></Grid>
+                <Grid item xs={6} md={2}><Metric label="Current equity" value={formatCurrency(paperAccount.current_equity || 0)} tone={paperPnl >= 0 ? 'success.main' : 'error.main'} /></Grid>
+                <Grid item xs={6} md={2}><Metric label="Realized P&L" value={formatCurrency(paperAccount.realized_pnl || 0)} tone={paperAccount.realized_pnl >= 0 ? 'success.main' : 'error.main'} /></Grid>
+                <Grid item xs={6} md={2}><Metric label="Unrealized P&L" value={formatCurrency(paperAccount.unrealized_pnl || 0)} tone={paperAccount.unrealized_pnl >= 0 ? 'success.main' : 'error.main'} /></Grid>
+                <Grid item xs={6} md={2}><Metric label="Closed trades" value={formatNumber(paperAccount.closed_trades || 0, 0)} /></Grid>
+                <Grid item xs={6} md={2}><Metric label="Max risk/trade" value={formatCurrency(paperAccount.max_risk_per_trade || 0)} /></Grid>
+              </Grid>
+              <Typography variant="caption" color="text.secondary">
+                Last action: {paperAccount.last_action?.type || 'Unavailable'} · {paperAccount.last_action?.reason || 'No blocker'} · Updated {paperAccount.generated_at || '-'}
+              </Typography>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Grid>
 
       <Grid item xs={12} lg={5}>
         <Card sx={{ height: '100%' }}>

@@ -18,6 +18,8 @@ The dashboard runs at `http://127.0.0.1:5174` and uses
 The **System Status** sidebar page reads `GET /system/status` and displays:
 
 - Options paper, equity intraday paper, and long-term investment-plan lanes.
+- ₹1 lakh options paper-account equity, realized/unrealized P&L, trade count,
+  maximum risk per trade, open-position state, and latest action/block reason.
 - Broker order-API and static-IP execution state.
 - Kill switch, feed, schema, lane parity, daily paper P&L, and loss streak.
 - Option-chain quality and genuine forward-evidence status.
